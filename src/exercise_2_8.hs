@@ -19,7 +19,7 @@ sub_interval x y =
   make_interval ((lower_bound x) - (upper_bound y)) ( (upper_bound x) - (lower_bound y))
   
 
-make_interval a b = (a,b)
+make_interval a b = (a, b)
 
 upper_bound x = max (fst x) (snd x)
 

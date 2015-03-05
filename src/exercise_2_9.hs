@@ -18,7 +18,7 @@ div_interval x y =
 sub_interval x y = 
   make_interval ((lower_bound x) - (lower_bound y)) ( (upper_bound x) - (upper_bound y))
 
-make_interval a b = (a,b)
+make_interval a b = (a, b)
 
 upper_bound x = max (fst x) (snd x)
 
@@ -28,16 +28,19 @@ main :: IO ()
 main = do
   let a = make_interval (10) (20)
       b = make_interval (1) (10)
+      c = make_interval (10) (20)
   print "a"
   print a
   print "b"
   print b
-  print "add a b"
-  print $ add_interval a b
+  print "c"
+  print c
   print "mul a b"
   print $ mul_interval a b
+  print "mul a c"
+  print $ mul_interval a c
   print "div a b"
   print $ div_interval a b
-  print "sub a b"
-  print $ sub_interval a b
+  print "div a c"
+  print $ div_interval a c
 

@@ -13,17 +13,23 @@ mul_interval x y =
 
 width x = abs ((upper_bound x) - (lower_bound x))
 
+zero_span x 
+  | lx == ux = true
+  | otherwise = false
+  where
+    lx = lower_bound x
+    ux = upper_bound x
+
+
 div_interval x y
-  | (lower_bound y) == 0 = error "Division by zero"
-  | (upper_bound y) == 0 = error "Division by zero"
-  | width y == 0 = error "Division by zero"
+  | zero_span y == 0 = error "Division by zero"
   | otherwise = mul_interval x (make_interval (1.0 / (upper_bound y))
                                               (1.0 / (lower_bound y)))
 
 sub_interval x y = 
   make_interval ((lower_bound x) - (lower_bound y)) ( (upper_bound x) - (upper_bound y))
 
-make_interval a b = (a,b)
+make_interval a b = (a, b)
 
 upper_bound x = max (fst x) (snd x)
 
@@ -34,14 +40,20 @@ main = do
   let a = make_interval (-10) (-20)
       b = make_interval (0) (-1)
       c = make_interval (-1) (-1)
+      d = make_interval (1) (2)
   print "a"
   print a
   print "b"
   print b
   print "c"
   print c
-  --print "div a b"
-  --print $ div_interval a b
-  print "div a c"
-  print $ div_interval a c
+  print "d"
+  print d
+  print "------"
+  -- print "div a b"
+  -- print $ div_interval a b
+  -- print "div a c"
+  -- print $ div_interval a c
+  print "div a d"
+  print $ div_interval a d
 
