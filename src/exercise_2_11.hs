@@ -51,6 +51,10 @@ make_center_width c w = make_interval (c-w) (c+w)
 
 center x = ((lower_bound x) + (upper_bound x)) / 2
 
+approximate_mul_interval x y =
+  make_center_percent ((center x) * (center y))  ((percent x) + (percent y)) 
+
+
 
 
 main :: IO ()
@@ -58,6 +62,12 @@ main = do
   let a = make_interval (-10) (-20)
       b = make_interval (0) (-1)
       c = make_interval (-1) (-1)
+      s_a = make_interval (10) (11)
+      s_b = make_interval (100) (101)
+  print $ "mul_interval"
+  print $ mul_interval a b
+  print $ "approximate_mul_interval"
+  print $ approximate_mul_interval a b
   print "a"
   print a
   print "b"
@@ -68,4 +78,8 @@ main = do
   print $ mul_interval a b
   print "mul a c"
   print $ mul_interval a c
+  print $ "mul_interval"
+  print $ mul_interval s_a s_b
+  print $ "approximate_mul_interval"
+  print $ approximate_mul_interval s_a s_b
 
