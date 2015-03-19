@@ -20,9 +20,9 @@ div_interval x y =
 
 make_interval a b = (a, b)
 
-upper_bound x = (snd x)
+upper_bound (a,b) = max a b
 
-lower_bound x = (fst x)
+lower_bound (a,b) = min a b
 
 main :: IO ()
 main = do

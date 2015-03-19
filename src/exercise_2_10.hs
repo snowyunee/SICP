@@ -14,7 +14,7 @@ mul_interval x y =
 width x = abs ((upper_bound x) - (lower_bound x))
 
 zero_span x 
-  | lx == ux = true
+  | (lx <=0) && (ux >=0) = true
   | otherwise = false
   where
     lx = lower_bound x
@@ -22,7 +22,7 @@ zero_span x
 
 
 div_interval x y
-  | zero_span y == 0 = error "Division by zero"
+  | zero_span y = error "Division by zero"
   | otherwise = mul_interval x (make_interval (1.0 / (upper_bound y))
                                               (1.0 / (lower_bound y)))
 

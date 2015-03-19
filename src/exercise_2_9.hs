@@ -28,7 +28,7 @@ main :: IO ()
 main = do
   let a = make_interval (10) (20)
       b = make_interval (1) (10)
-      c = make_interval (10) (20)
+      c = make_interval (11) (20)
   print "a"
   print a
   print "b"

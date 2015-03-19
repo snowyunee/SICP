@@ -43,9 +43,9 @@ sub_interval x y =
 
 make_interval a b = (a, b)
 
-upper_bound x = max (fst x) (snd x)
+upper_bound = uncury max 
 
-lower_bound x = min (fst x) (snd x)
+lower_bound = uncury min
 
 make_center_width c w = make_interval (c-w) (c+w)
 
