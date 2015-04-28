@@ -1,19 +1,12 @@
 import Control.Monad
+import DeepReverse
 
-reverse' :: [a] -> [a]
-reverse' xs = reverse'' xs []
-  where reverse'' []      a = a
-        reverse'' (x:xs)  a = reverse'' xs (x:a)
-
-deepReverse :: [a] -> [a]
-deepReverse xs@[]       = xs
-deepReverse xs@(_:_)    = reverse' $ map deepReverse xs
-deepReverse xs          = xs
 
 main = do
-  print $ "[[6,5,4],[321],[3,2,0]]"
-  print $ deepReverse [[[0],[2,3]],[[321]],[[4],[5,6]]]
-  print $ deepReverse [1,2,3]
-  print $ deepReverse [1]
-  print $ deepReverse [[1,2,3]]
+--  print $ "[[6,5,4],[321],[3,2,0]]"
+  print $ ((deepReverse [[[7],[6,5]],[[444]],[[3],[2,1]]]) :: [[[Int]]])
+  print $ ((deepReverse [[[4,3],[2, 1]]]) :: [[[Int]]])
+  print $ ((deepReverse [[[2,1]]]) :: [[[Int]]])
+  print $ ((deepReverse [[2,1]]) :: [[Int]])
+  print $ ((deepReverse [1]) :: [Int])
 
