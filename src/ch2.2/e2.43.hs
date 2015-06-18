@@ -1,3 +1,4 @@
+import Debug.Trace
 
 enumerateInterval :: (Ord a, Enum a) => a -> a -> [a]
 enumerateInterval l h
@@ -27,24 +28,29 @@ queens boardSize = queenCols boardSize
       | k == 0 = emptyBoard
       | otherwise =
           filter (\positions -> safe k positions) $
-          concatMap (\restOfQeens -> 
-                        map (\newRow -> adjoinPosition newRow k restOfQeens)
-                            (enumerateInterval 1 boardSize)) $
-          queenCols (k - 1)
+          concatMap (\newRow  -> 
+                        map (\restOfQueens -> traceShow ((k, newRow, restOfQueens)) (adjoinPosition newRow k restOfQueens))
+                            (queenCols (k - 1))) $
+          (enumerateInterval 1 boardSize)
 
 main = do
-  -- [[(1,2),(2,4),(3,6),(4,1),(5,3),(6,5)],
-  -- [(1,3),(2,6),(3,2),(4,5),(5,1),(6,4)],
-  -- [(1,4),(2,1),(3,5),(4,2),(5,6),(6,3)],
-  -- [(1,5),(2,3),(3,1),(4,6),(5,4),(6,2)]]
-  print $ queens 6
-  -- 10
-  print $ length $ queens 5
-  -- 4
-  print $ length $ queens 6
-  -- 40
-  print $ length $ queens 7
-  -- 92
-  print $ length $ queens 8
-  -- 352
-  print $ length $ queens 9
+  -- "1"
+  -- (1,1,[])
+  -- [[(1,1)]]
+  print $ "1"
+  print $ queens 1
+  -- "2"
+  -- (1,1,[])
+  -- (2,1,[(1,1)])
+  -- (1,2,[])
+  -- (2,1,[(1,2)])
+  -- (1,1,[])
+  -- (2,2,[(1,1)])
+  -- (1,2,[])
+  -- (2,2,[(1,2)])
+  -- []
+  print $ "2"
+  print $ queens 2
+  -- [[]]
+  print $ "3"
+  print $ queens 3
