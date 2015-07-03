@@ -111,10 +111,14 @@
 (define (end-segment seg)
   (cdr seg))
 
+(display "exercise 2.48\n")
 (make-segment v1 v2)
 (start-segment (make-segment v1 v2))
 (end-segment (make-segment v1 v2))
 
-
+;exercise 2.48
+;((9 . 10) 7 . 9)
+;(9 . 10)
+;(7 . 9)
 
  
