@@ -47,21 +47,7 @@
 (define (operands exp) (cdr exp))
 
 
-(define (make-sum a1 a2)
-  (cond ((=number? a1 0) a2)
-        ((=number? a2 0) a1)
-        ((and (number? a1) (number? a2)) (+ a1 a2))
-        (else (list '+ a1 a2))))
-(define (make-product m1 m2)
-  (cond ((or (=number? m1 0) (=number? m2 0)) 0)
-        ((=number? m1 1) m2)
-        ((=number? m2 1) m1)
-        ((and (number? m1) (number? m2)) (* m1 m2))
-        (else (list '* m1 m2))))
-(define (make-exponentiation base e)
-  (cond ((=number? e 0) 1)
-        ((=number? e 1) base)
-        (else (list '** base e))))
+
 
 
 
@@ -82,23 +68,36 @@
   ;; internal procedures
   (define (addend s) (car s))
   (define (augend s) (cadr s))
+  (define (make-sum a1 a2)
+  (cond ((=number? a1 0) a2)
+        ((=number? a2 0) a1)
+        ((and (number? a1) (number? a2)) (+ a1 a2))
+        (else (list '+ a1 a2))))
   (define (deriv-sum exp var)
     (make-sum (deriv (addend exp) var)
               (deriv (augend exp) var)))
 
   ;; interface to the rest of the system
   (put 'deriv '+ deriv-sum)
+  (put 'make '+ make-sum)
   'done-sum)
 
 (define (install-product-deriv)
   ;; internal procedures
   (define (multiplier p) (car p))
   (define (multiplicand p) (cadr p))
+  (define (make-product m1 m2)
+  (cond ((or (=number? m1 0) (=number? m2 0)) 0)
+        ((=number? m1 1) m2)
+        ((=number? m2 1) m1)
+        ((and (number? m1) (number? m2)) (* m1 m2))
+        (else (list '* m1 m2))))
+
   (define (deriv-product exp var)
       ;(print 'product-exp)
       ;(print exp)
       ;(print '\n)
-    (make-sum 
+    ((get 'make '+)
      (make-product (multiplier exp)
                    (deriv (multiplicand exp) var))
      (make-product (deriv (multiplier exp) var)
@@ -107,6 +106,7 @@
 
   ;; interface to the rest of the system
   (put 'deriv '* deriv-product)
+  (put 'make '* make-product)
   'done-product)
 
 (install-sum-deriv)
@@ -125,18 +125,25 @@
   ;; internal procedures
   (define (base p) (car p))
   (define (exponent p) (cadr p))
+  (define (make-exponentiation base e)
+  (cond ((=number? e 0) 1)
+        ((=number? e 1) base)
+        (else (list '** base e))))
+
   (define (deriv-exponentiation exp var)
       ;(print 'product-exp)
       ;(print exp)
       ;(print '\n)
-    (make-product  (make-product (exponent exp)
-                                 (make-exponentiation (base exp)
-                                                      (make-sum (exponent exp) -1)))
-                   (deriv (base exp) var)))
+    ((get 'make '*)  ((get 'make '*) (exponent exp)
+                                     (make-exponentiation (base exp)
+                                                          ((get 'make '+) (exponent exp) -1)))
+                     (deriv (base exp) var)))
 
   ;; interface to the rest of the system
   (put 'deriv '** deriv-exponentiation)
+  (put 'make '** make-exponentiation)
   'done-exponentiation)
+(install-expo-deriv)
 
 (deriv '(** (+ x y) 2) 'x)
 (deriv '(* a (** x 2)) 'x)
@@ -144,8 +151,6 @@
 (deriv '(+ (+ (* a (** x 2)) (* b x)) c) 'x)
 
 ;d.  In this simple algebraic manipulator the type of an expression is the algebraic operator that binds it together. Suppose, however, we indexed the procedures in the opposite way, so that the dispatch line in deriv looked like
-
 ;((get (operator exp) 'deriv) (operands exp) var)
-
 ;What corresponding changes to the derivative system are required?
-
+; => put 만 반대로 바꾸면 될 듯.d
