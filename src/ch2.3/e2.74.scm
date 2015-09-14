@@ -89,12 +89,28 @@
 (install-division-b-package)
 
 
+(define (find-employee-record name files)
+  (cond ((null? files) `())
+        ((pair? files) (cons (get-record (car files) name)
+                             (find-employee-record name (cdr files))))))
+;a)
 (get-record (division-a-file) `name1)
+;b)
 (get-salary (get-record (division-a-file) `name1))
+
 (get-record (division-b-file) `name1)
 (get-salary (get-record (division-b-file) `name1))
+
+;c)
+(find-employee-record `name1 (list (division-a-file) (division-b-file)) )
+
+;d)
+; extend type tag as (company, division)
+
+; result
 ;(division-a name1 100 010-111-1111)
 ;100
 ;(division-b name1 010-111-1111 100)
 ;100
+;((division-a name1 100 010-111-1111) (division-b name1 010-111-1111 100))
  
