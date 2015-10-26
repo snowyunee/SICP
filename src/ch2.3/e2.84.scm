@@ -67,3 +67,5 @@
 (sum (make-integer 3) (make-integer 2) (make-real 1.5))
 (sum (make-integer 3) (make-rational 1 2) (make-complex-from-real-imag 1.5 0))
 
+; output
+;(sum-integer 3 1 1)(sum-real 3 2 1.5)(sum-complex 3 (1 . 2) (rectangular 1.5 . 0))
