@@ -16,6 +16,7 @@
 ; generic.scm apply-generic
 (define (apply-generic op . args)
   (define (convert type arg)
+    ;(display (list 'convert-type-arg type arg))
     (let ((arg-type (type-tag arg)))
       (let ((proc (get 'raise (list arg-type))))
         (if (equal? arg-type type)
@@ -55,13 +56,14 @@
 
 
 
-(put 'sum '(real real real)               (lambda (x y z) (display (list 'real x y z))))
-(put 'sum '(integer integer integer)      (lambda (x y z) (display (list 'integer x y z))))
-(put 'sum '(rational rational rational)   (lambda (x y z) (display (list 'rational x y z))))
+(put 'sum '(real real real)               (lambda (x y z) (display (list 'sum-real x y z))))
+(put 'sum '(integer integer integer)      (lambda (x y z) (display (list 'sum-integer x y z))))
+(put 'sum '(rational rational rational)   (lambda (x y z) (display (list 'sum-rational x y z))))
+(put 'sum '(complex complex complex)      (lambda (x y z) (display (list 'sum-complex x y z))))
 
 (define (sum x y z) (apply-generic 'sum x y z))   
 
-;(sum (make-integer 3) (make-integer 1) (make-integer 1))
-(sum (make-integer 3) (make-integer 1) (make-real 1.5))
+(sum (make-integer 3) (make-integer 1) (make-integer 1))
+(sum (make-integer 3) (make-integer 2) (make-real 1.5))
 (sum (make-integer 3) (make-rational 1 2) (make-complex-from-real-imag 1.5 0))
 

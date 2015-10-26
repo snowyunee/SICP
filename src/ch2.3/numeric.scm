@@ -272,11 +272,13 @@
 (define (install-raise)
   (define (raise x) (apply-generic 'raise x))
   
-  (define (integer->rational n)   (make-rational (contents n) 1))
+  (define (integer->rational n)
+    (make-rational (contents n) 1))
   (define (rational->real n)
-     (display (denom n))
-     (make-real (/ (numer n) (denom n))))
-  (define (real->complex n)      (make-complex-from-real-imag (contents n) 0))
+     ;(display (list 'rational->real n (numer (contents n)) (denom (contents n))))
+     (make-real (/ (numer (contents n)) (denom (contents n)))))
+  (define (real->complex n)
+    (make-complex-from-real-imag (contents n) 0))
   
   (put-coercion 'integer   'rational   integer->rational)
   (put-coercion 'rational  'real       rational->real)
