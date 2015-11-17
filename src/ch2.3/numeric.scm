@@ -273,12 +273,11 @@
   (define (raise x) (apply-generic 'raise x))
   
   (define (integer->rational n)
-    (make-rational (contents n) 1))
+    (make-rational n 1))
   (define (rational->real n)
-     ;(display (list 'rational->real n (numer (contents n)) (denom (contents n))))
-     (make-real (/ (numer (contents n)) (denom (contents n)))))
+     (make-real (/ (numer n) (denom n))))
   (define (real->complex n)
-    (make-complex-from-real-imag (contents n) 0))
+    (make-complex-from-real-imag n 0))
   
   (put-coercion 'integer   'rational   integer->rational)
   (put-coercion 'rational  'real       rational->real)
@@ -288,7 +287,30 @@
   (put 'raise '(rational)     rational->real)
   (put 'raise '(real)         real->complex)
   'done-raise)
-  
+
+
+;;------------------------------------------------------------
+;; drop
+;
+;(define (install-drop)
+;  (define (drop x) (apply-generic 'drop x))
+;  
+;  (define (complex->real n)
+;    (make-real (real-part n)))
+;  (define (real->integer n)
+;    (make-integer (round n)))
+;  (define (rational->integer n)
+;    (make-integer (round (/ (numer (contents n)) (denom (contents))))))
+;  
+;  (put-coercion 'complex   'real           complex->real)
+;  (put-coercion 'real      'integer        real->integer)
+;  (put-coercion 'rational  'integer        rational->integer)
+;  
+;  (put 'drop '(complex)      complex->real)
+;  (put 'drop '(real)         real->integer)
+;  (put 'drop '(rational)     rational->integer)
+;  'done-drop)
+;  
 
 ;------------------------------------------------------------
 ; install all
@@ -301,4 +323,5 @@
 (install-complex-package)
 (install-real-package)
 (install-raise)
+;(install-drop)
 

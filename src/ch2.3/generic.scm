@@ -78,14 +78,58 @@
 ;---------------------------------------------------------------------
 ; 2.83
 
+;(define (apply-generic op . args)
+;  (define (convert type arg)
+;    (let ((arg-type (type-tag arg)))
+;      (let ((proc (apply-generic arg-type type)))
+;        (if (equal? arg-type type)
+;            arg
+;            (if proc
+;                (let ((converted (proc arg)))
+;                  (if (equal? (type-tag converted) type)
+;                      converted
+;                      (convert type converted)))
+;                #f)))))
+;
+;  (define (all-converted? args)
+;    (foldr (lambda (v acc) (and acc (pair? v))) #t args))
+;
+;  (define (convert-all type args)
+;    (let ((converted-args (map (lambda (arg) (convert type arg)) args)))
+;          (if (all-converted? converted-args)
+;              converted-args
+;              #f)))
+;
+;  (define (apply-generic-same-types types args)
+;    (if (pair? types)
+;        (let ((converted-args (convert-all (car types) args)))
+;          (if converted-args
+;              (let ((proc (get op (map type-tag converted-args))))
+;                (if proc
+;                    (apply proc (map contents args))
+;                    (apply-generic-same-types (cdr types) args)))
+;              (apply-generic-same-types (cdr types) args)))
+;        (error "No method for these types" (list op (map type-tag args)))))
+;
+;  (let ((type-tags (map type-tag args)))
+;    (let ((proc (get op type-tags)))
+;      (if proc
+;          (apply proc (map contents args))
+;          (apply-generic-same-types type-tags args)))))
+
+
+;---------------------------------------------------------------------
+; 2.84
+
 (define (apply-generic op . args)
   (define (convert type arg)
+    ;(display (list 'convert-type-arg type arg))
     (let ((arg-type (type-tag arg)))
-      (let ((proc (apply-generic arg-type type)))
+      (let ((proc (get 'raise (list arg-type))))
         (if (equal? arg-type type)
             arg
             (if proc
-                (let ((converted (proc arg)))
+                (let ((converted (proc (contents arg))))
                   (if (equal? (type-tag converted) type)
                       converted
                       (convert type converted)))
@@ -106,7 +150,7 @@
           (if converted-args
               (let ((proc (get op (map type-tag converted-args))))
                 (if proc
-                    (apply proc (map contents args))
+                    (apply proc (map contents converted-args))
                     (apply-generic-same-types (cdr types) args)))
               (apply-generic-same-types (cdr types) args)))
         (error "No method for these types" (list op (map type-tag args)))))
@@ -117,3 +161,49 @@
           (apply proc (map contents args))
           (apply-generic-same-types type-tags args)))))
 
+
+
+;---------------------------------------------------------------------
+; 2.85
+;
+;(define (apply-generic2 op . args)
+;  (define (convert type arg)
+;    ;(display (list 'convert-type-arg type arg))
+;    (let ((arg-type (type-tag arg)))
+;      (let ((proc (get 'raise (list arg-type))))
+;        (if (equal? arg-type type)
+;            arg
+;            (if proc
+;                (let ((converted (apply proc arg)))
+;                  (if (equal? (type-tag converted) type)
+;                      converted
+;                      (convert type converted)))
+;                #f)))))
+;
+;  (define (all-converted? args)
+;    (foldr (lambda (v acc) (and acc (pair? v))) #t args))
+;
+;  (define (convert-all type args)
+;
+;          (if (all-converted? converted-args)
+;              converted-args
+;              #f))
+;
+;  (define (apply-generic-same-types types args)
+;    (if (pair? types)
+;        (let ((converted-args (convert-all (car types) args)))
+;          (if converted-args
+;              (let ((proc (get op (map type-tag converted-args))))
+;                (if proc
+;                    (apply proc (map contents args))
+;                    (apply-generic-same-types (cdr types) args)))
+;              (apply-generic-same-types (cdr types) args)))
+;        (error "No method for these types" (list op (map type-tag args)))))
+;
+;  (let ((type-tags (map type-tag args)))
+;    (let ((proc (get op type-tags)))
+;      (if proc
+;          (drop (apply proc (map contents args)))
+;          (drop (apply-generic-same-types type-tags args)))))
+;
+;
