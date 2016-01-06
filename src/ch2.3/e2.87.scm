@@ -280,16 +280,16 @@
   ((get 'make 'polynomial) var terms))
 
 
-(define p1 (make-polynomial 'x (cons 'sparse (list (list 3 1) (list 2 2) (list 1 1)))))
-(define p2 (make-polynomial 'x (cons 'sparse (list (list 3 3) (list 2 3) (list 1 3)))))
+(define p1 (make-polynomial 'x (cons 'sparse (list (list 5 1) (list 2 2) (list 1 1)))))
+(define p2 (make-polynomial 'x (cons 'sparse (list (list 5 3) (list 2 3) (list 1 3)))))
 (add p1 p2)
 
 
 ; Exercise 2.87.  Install =zero? for polynomials in the generic arithmetic package. This will allow adjoin-term to work for polynomials with coefficients that are themselves polynomials.
 ; see commend e 2.87
 (println "2.87")
-(define pp1 (make-polynomial 'y (cons 'sparse (list (list 3 p1) (list 2 p1) (list 1 1)))))
-(define pp2 (make-polynomial 'y (cons 'sparse (list (list 3 p2) (list 2 p2) (list 1 3)))))
+(define pp1 (make-polynomial 'y (cons 'sparse (list (list 5 p1) (list 2 p1) (list 1 1)))))
+(define pp2 (make-polynomial 'y (cons 'sparse (list (list 5 p2) (list 2 p2) (list 1 3)))))
 (println pp1)
 (println pp2)
 (add pp1 pp2)
@@ -302,10 +302,10 @@
 ; Exercise 2.89 Define procedures that implement the term-list representation described above as appropriate for dense polynomials.
 ; Exercise 2.90.  Suppose we want to have a polynomial system that is efficient for both sparse and dense polynomials. One way to do this is to allow both kinds of term-list representations in our system. The situation is analogous to the complex-number example of section 2.4, where we allowed both rectangular and polar representations. To do this we must distinguish different types of term lists and make the operations on term lists generic. Redesign the polynomial system to implement this generalization. This is a major effort, not a local change.
 (println "2.89, 2.90")
-(define dp1 (make-polynomial 'x (cons 'dense (list 1 2 1))))
-(define dp2 (make-polynomial 'x (cons 'dense (list 3 3 3))))
-(define dpp1 (make-polynomial 'y (cons 'dense (list dp1 dp1 1))))
-(define dpp2 (make-polynomial 'y (cons 'dense (list dp2 dp2 3))))
+(define dp1 (make-polynomial 'x (cons 'dense (list 1 0 0 2 1))))
+(define dp2 (make-polynomial 'x (cons 'dense (list 3 0 0 3 3))))
+(define dpp1 (make-polynomial 'y (cons 'dense (list dp1 0 0 dp1 1))))
+(define dpp2 (make-polynomial 'y (cons 'dense (list dp2 0 0 dp2 3))))
 (println dpp1)
 (println dpp2)
 (add dpp1 dpp2)
@@ -318,18 +318,18 @@
 
 
 ; output
-;(polynomial x sparse (3 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))
-;"2.87"
-;(polynomial y sparse (3 (polynomial x sparse (3 1) (2 2) (1 1))) (2 (polynomial x sparse (3 1) (2 2) (1 1))) (1 1))
-;(polynomial y sparse (3 (polynomial x sparse (3 3) (2 3) (1 3))) (2 (polynomial x sparse (3 3) (2 3) (1 3))) (1 3))
-;(polynomial y sparse (3 (polynomial x sparse (3 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))) (2 (polynomial x sparse (3 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))) (1 (scheme-number . 4)))
-;"2.88"
-;(polynomial x sparse (3 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))
-;(polynomial y sparse (3 (polynomial x sparse (3 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))) (2 (polynomial x sparse (3 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))) (1 (scheme-number . -2)))
-;"2.89, 2.90"
-;(polynomial y dense (polynomial x dense 1 2 1) (polynomial x dense 1 2 1) 1)
-;(polynomial y dense (polynomial x dense 3 3 3) (polynomial x dense 3 3 3) 3)
-;(polynomial y dense (polynomial x dense (scheme-number . 4) (scheme-number . 5) (scheme-number . 4)) (polynomial x dense (scheme-number . 4) (scheme-number . 5) (scheme-number . 4)) (scheme-number . 4))
-;
+; (polynomial x sparse (5 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))
+; "2.87"
+; (polynomial y sparse (5 (polynomial x sparse (5 1) (2 2) (1 1))) (2 (polynomial x sparse (5 1) (2 2) (1 1))) (1 1))
+; (polynomial y sparse (5 (polynomial x sparse (5 3) (2 3) (1 3))) (2 (polynomial x sparse (5 3) (2 3) (1 3))) (1 3))
+; (polynomial y sparse (5 (polynomial x sparse (5 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))) (2 (polynomial x sparse (5 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))) (1 (scheme-number . 4)))
+; "2.88"
+; (polynomial x sparse (5 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))
+; (polynomial y sparse (5 (polynomial x sparse (5 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))) (2 (polynomial x sparse (5 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))) (1 (scheme-number . -2)))
+; "2.89, 2.90"
+; (polynomial y dense (polynomial x dense 1 0 0 2 1) 0 0 (polynomial x dense 1 0 0 2 1) 1)
+; (polynomial y dense (polynomial x dense 3 0 0 3 3) 0 0 (polynomial x dense 3 0 0 3 3) 3)
+; (polynomial y dense (polynomial x dense (scheme-number . 4) 0 0 (scheme-number . 5) (scheme-number . 4)) 0 0 (polynomial x dense (scheme-number . 4) 0 0 (scheme-number . 5) (scheme-number . 4)) (scheme-number . 4))
+
 
 
