@@ -24,7 +24,6 @@
 ;########## sparse terms              #######################
 (define (install-sparse-terms-package)
   (define (add-sparse-terms L1 L2)
-    ;(println (list 'add-sparse-terms-L1-L2 'L1 L1 'L2 L2))
     (cond ((empty-termlist? L1) L2)
           ((empty-termlist? L2) L1)
           (else
@@ -75,8 +74,6 @@
            (mul-term-by-all-terms t1 (rest-terms L))))))
   
   (define (adjoin-term term term-list)
-    (println (list 'adjoin-term 'term term 'term-list term-list))
-    (println (list 'coeff (coeff term)))
     (if (=zero? (coeff term))
         term-list
         (cons term term-list)))
@@ -89,8 +86,6 @@
   (define (coeff term) (cadr term))
   ; e 2.87
   (define (zero-sparse-terms? L)
-    (println (list (empty-termlist? L)) )
-    (println (list (=zero? (coeff (first-term L))) ))
     (cond ((empty-termlist? L) #t)
           ((not (=zero? (coeff (first-term L)))) #f)
           (else (zero-sparse-terms? rest-terms L))))
@@ -106,8 +101,97 @@
   (put 'make-terms 'sparse
        (lambda (terms) (tag terms)))
   (put 'zero-terms? '(sparse)
-       (lambda (p) (tag (zero-sparse-terms? p))))
+       (lambda (p) (zero-sparse-terms? p)))
   'done-sparse-terms)
+  
+;############################################################
+;############################################################
+
+
+
+;############################################################
+;########## dense terms              ########################
+(define (install-dense-terms-package)
+  (define (add-dense-terms L1 L2)
+    (cond ((empty-termlist? L1) L2)
+          ((empty-termlist? L2) L1)
+          (else
+           (let ((t1 (first-term L1)) (t2 (first-term L2)))
+             (cond ((> (order t1) (order t2))
+                    (adjoin-term
+                     t1 (add-dense-terms (rest-terms L1) L2)))
+                   ((< (order t1) (order t2))
+                    (adjoin-term
+                     t2 (add-dense-terms L1 (rest-terms L2))))
+                   (else
+                    (adjoin-term
+                     (make-term (order t1)
+                                (add (coeff t1) (coeff t2)))
+                     (add-dense-terms (rest-terms L1)
+                                (rest-terms L2)))))))))
+  
+  (define (sub-dense-terms L1 L2)
+    (cond ((empty-termlist? L1) L2)
+          ((empty-termlist? L2) L1)
+          (else
+           (let ((t1 (first-term L1)) (t2 (first-term L2)))
+             (cond ((> (order t1) (order t2))
+                    (adjoin-term
+                     t1 (sub-dense-terms (rest-terms L1) L2)))
+                   ((< (order t1) (order t2))
+                    (adjoin-term
+                     t2 (sub-dense-terms L1 (rest-terms L2))))
+                   (else
+                    (adjoin-term
+                     (make-term (order t1)
+                                (sub (coeff t1) (coeff t2)))
+                     (sub-dense-terms (rest-terms L1)
+                                (rest-terms L2)))))))))
+  
+  (define (mul-dense-terms L1 L2)
+    (if (empty-termlist? L1)
+        (the-empty-termlist)
+        (add-dense-terms (mul-term-by-all-terms (first-term L1) L2)
+                   (mul-dense-terms (rest-terms L1) L2))))
+  (define (mul-term-by-all-terms t1 L)
+    (if (empty-termlist? L)
+        (the-empty-termlist)
+        (let ((t2 (first-term L)))
+          (adjoin-term
+           (make-term (+ (order t1) (order t2))
+                      (mul (coeff t1) (coeff t2)))
+           (mul-term-by-all-terms t1 (rest-terms L))))))
+  
+  (define (adjoin-term term term-list)
+    (cond ((=zero? (coeff term)) term-list)
+          ((equal? (order term) (+ 1 (length term-list))) (cons (coeff term) term-list))
+          (else (adjoin-term term (cons 0 term-list)))))
+  (define (the-empty-termlist) '())
+  (define (first-term term-list) (make-term (length term-list) (car term-list)))
+  (define (rest-terms term-list) (cdr term-list))
+  (define (empty-termlist? term-list) (null? term-list))
+  (define (make-term order coeff) (list order coeff))
+  (define (order term) (car term))
+  (define (coeff term) (cadr term))
+  ; e 2.87
+  (define (zero-dense-terms? L)
+    (cond ((empty-termlist? L) #t)
+          ((not (=zero? (coeff (first-term L)))) #f)
+          (else (zero-dense-terms? rest-terms L))))
+  
+  ;; interface to rest of the system
+  (define (tag p) (attach-tag 'dense p))
+  (put 'add-terms '(dense dense) 
+       (lambda (p1 p2) (tag (add-dense-terms p1 p2))))
+  (put 'sub-terms '(dense dense) 
+       (lambda (p1 p2) (tag (sub-dense-terms p1 p2))))
+  (put 'mul-terms '(dense dense) 
+       (lambda (p1 p2) (tag (mul-dense-terms p1 p2))))
+  (put 'make-terms 'dense
+       (lambda (terms) (tag terms)))
+  (put 'zero-terms? '(dense)
+       (lambda (p) (zero-dense-terms? p)))
+  'done-dense-terms)
   
 ;############################################################
 ;############################################################
@@ -141,8 +225,6 @@
   ;<procedures used by mul-poly>
   ; 책 다음 페이지에서 가져옴
   (define (add-poly p1 p2)
-    (println p1)
-    (println p2)
     (if (same-variable? (variable p1) (variable p2))
         (make-poly (variable p1)
                    (add-terms (term-list p1)
@@ -192,6 +274,7 @@
 
 (install-polynomial-package)
 (install-sparse-terms-package)
+(install-dense-terms-package)
 
 (define (make-polynomial var terms)
   ((get 'make 'polynomial) var terms))
@@ -199,7 +282,7 @@
 
 (define p1 (make-polynomial 'x (cons 'sparse (list (list 3 1) (list 2 2) (list 1 1)))))
 (define p2 (make-polynomial 'x (cons 'sparse (list (list 3 3) (list 2 3) (list 1 3)))))
-;(add p1 p2)
+(add p1 p2)
 
 
 ; Exercise 2.87.  Install =zero? for polynomials in the generic arithmetic package. This will allow adjoin-term to work for polynomials with coefficients that are themselves polynomials.
@@ -217,8 +300,15 @@
 (sub pp1 pp2)
 
 ; Exercise 2.89 Define procedures that implement the term-list representation described above as appropriate for dense polynomials.
-
 ; Exercise 2.90.  Suppose we want to have a polynomial system that is efficient for both sparse and dense polynomials. One way to do this is to allow both kinds of term-list representations in our system. The situation is analogous to the complex-number example of section 2.4, where we allowed both rectangular and polar representations. To do this we must distinguish different types of term lists and make the operations on term lists generic. Redesign the polynomial system to implement this generalization. This is a major effort, not a local change.
+(println "2.89, 2.90")
+(define dp1 (make-polynomial 'x (cons 'dense (list 1 2 1))))
+(define dp2 (make-polynomial 'x (cons 'dense (list 3 3 3))))
+(define dpp1 (make-polynomial 'y (cons 'dense (list dp1 dp1 1))))
+(define dpp2 (make-polynomial 'y (cons 'dense (list dp2 dp2 3))))
+(println dpp1)
+(println dpp2)
+(add dpp1 dpp2)
 
 
 ; Exercise 2.91.  A univariate polynomial can be divided by another one to produce a polynomial quotient and a polynomial remainder. For example,
@@ -227,7 +317,19 @@
 
 
 
-
-
+; output
+;(polynomial x sparse (3 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))
+;"2.87"
+;(polynomial y sparse (3 (polynomial x sparse (3 1) (2 2) (1 1))) (2 (polynomial x sparse (3 1) (2 2) (1 1))) (1 1))
+;(polynomial y sparse (3 (polynomial x sparse (3 3) (2 3) (1 3))) (2 (polynomial x sparse (3 3) (2 3) (1 3))) (1 3))
+;(polynomial y sparse (3 (polynomial x sparse (3 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))) (2 (polynomial x sparse (3 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))) (1 (scheme-number . 4)))
+;"2.88"
+;(polynomial x sparse (3 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))
+;(polynomial y sparse (3 (polynomial x sparse (3 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))) (2 (polynomial x sparse (3 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))) (1 (scheme-number . -2)))
+;"2.89, 2.90"
+;(polynomial y dense (polynomial x dense 1 2 1) (polynomial x dense 1 2 1) 1)
+;(polynomial y dense (polynomial x dense 3 3 3) (polynomial x dense 3 3 3) 3)
+;(polynomial y dense (polynomial x dense (scheme-number . 4) (scheme-number . 5) (scheme-number . 4)) (polynomial x dense (scheme-number . 4) (scheme-number . 5) (scheme-number . 4)) (scheme-number . 4))
+;
 
 
