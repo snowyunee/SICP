@@ -17,6 +17,7 @@
 (define (add-terms x y) (apply-generic 'add-terms x y))
 (define (sub-terms x y) (apply-generic 'sub-terms x y))
 (define (mul-terms x y) (apply-generic 'mul-terms x y))
+(define (div-terms x y) (apply-generic 'div-terms x y))
 (define (zero-terms? x) (apply-generic 'zero-terms? x))
 
 
@@ -64,6 +65,7 @@
         (the-empty-termlist)
         (add-sparse-terms (mul-term-by-all-terms (first-term L1) L2)
                    (mul-sparse-terms (rest-terms L1) L2))))
+  
   (define (mul-term-by-all-terms t1 L)
     (if (empty-termlist? L)
         (the-empty-termlist)
@@ -72,6 +74,22 @@
            (make-term (+ (order t1) (order t2))
                       (mul (coeff t1) (coeff t2)))
            (mul-term-by-all-terms t1 (rest-terms L))))))
+
+  (define (div-sparse-terms L1 L2)
+    (if (empty-termlist? L1)
+        (list (the-empty-termlist) (the-empty-termlist))
+        (let ((t1 (first-term L1))
+              (t2 (first-term L2)))
+          (if (> (order t2) (order t1))
+              (list (the-empty-termlist) L1)
+              (let ((new-c (div (coeff t1) (coeff t2)))
+                    (new-o (- (order t1) (order t2))))
+                (let ((rest-of-result
+                       (div-sparse-terms (sub-sparse-terms L1 (mul-sparse-terms (list (make-term new-o new-c)) L2)) L2)
+                       ))
+                  (list (adjoin-term (make-term new-o new-c) (car rest-of-result))
+                        (cadr rest-of-result))
+                  ))))))
   
   (define (adjoin-term term term-list)
     (if (=zero? (coeff term))
@@ -98,6 +116,8 @@
        (lambda (p1 p2) (tag (sub-sparse-terms p1 p2))))
   (put 'mul-terms '(sparse sparse) 
        (lambda (p1 p2) (tag (mul-sparse-terms p1 p2))))
+  (put 'div-terms '(sparse sparse)
+       (lambda (p1 p2) (tag (div-sparse-terms p1 p2))))
   (put 'make-terms 'sparse
        (lambda (terms) (tag terms)))
   (put 'zero-terms? '(sparse)
@@ -248,7 +268,15 @@
                               (term-list p2)))
         (error "Polys not in same var -- SUB-POLY"
                (list p1 p2))))
-  
+
+  (define (div-poly p1 p2)
+    (if (same-variable? (variable p1) (variable p2))
+        (make-poly (variable p1)
+                   (div-terms (term-list p1)
+                              (term-list p2)))
+        (error "Polys not in same var -- DIV-POLY"
+               (list p1 p2))))
+    
 
   ; e 2.87
   (define (zero? p)
@@ -268,6 +296,9 @@
   ; e 2.88
   (put 'sub '(polynomial polynomial)
        (lambda (p1 p2) (tag (sub-poly p1 p2))))
+  ; e 2.91
+  (put 'div '(polynomial polynomial)
+       (lambda (p1 p2) (tag (div-poly p1 p2))))
   'done-install-polynomial)
 ;############################################################
 ;############################################################
@@ -312,24 +343,33 @@
 
 
 ; Exercise 2.91.  A univariate polynomial can be divided by another one to produce a polynomial quotient and a polynomial remainder. For example,
-
-
+;
+;(x^5 - 1) / (x^2 - 1) = x^3 + x remainter = x - 1
+;
+;Division can be performed via long division. That is, divide the highest-order term of the dividend by the highest-order term of the divisor. The result is the first term of the quotient. Next, multiply the result by the divisor, subtract that from the dividend, and produce the rest of the answer by recursively dividing the difference by the divisor. Stop when the order of the divisor exceeds the order of the dividend and declare the dividend to be the remainder. Also, if the dividend ever becomes zero, return zero as both quotient and remainder.
+;We can design a div-poly procedure on the model of add-poly and mul-poly. The procedure checks to see if the two polys have the same variable. If so, div-poly strips off the variable and passes the problem to div-terms, which performs the division operation on term lists. Div-poly finally reattaches the variable to the result supplied by div-terms. It is convenient to design div-terms to compute both the quotient and the remainder of a division. Div-terms can take two term lists as arguments and return a list of the quotient term list and the remainder term list.
+;Complete the following definition of div-terms by filling in the missing expressions. Use this to implement div-poly, which takes two polys as arguments and returns a list of the quotient and remainder polys.
+(println "2.91")
+(define k1 (make-polynomial 'x (cons 'sparse (list (list 5 1) (list 0 -1)))))
+(define k2 (make-polynomial 'x (cons 'sparse (list (list 2 1) (list 0 -1)))))
+(div k1 k2)
 
 
 
 ; output
-; (polynomial x sparse (5 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))
-; "2.87"
-; (polynomial y sparse (5 (polynomial x sparse (5 1) (2 2) (1 1))) (2 (polynomial x sparse (5 1) (2 2) (1 1))) (1 1))
-; (polynomial y sparse (5 (polynomial x sparse (5 3) (2 3) (1 3))) (2 (polynomial x sparse (5 3) (2 3) (1 3))) (1 3))
-; (polynomial y sparse (5 (polynomial x sparse (5 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))) (2 (polynomial x sparse (5 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))) (1 (scheme-number . 4)))
-; "2.88"
-; (polynomial x sparse (5 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))
-; (polynomial y sparse (5 (polynomial x sparse (5 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))) (2 (polynomial x sparse (5 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))) (1 (scheme-number . -2)))
-; "2.89, 2.90"
-; (polynomial y dense (polynomial x dense 1 0 0 2 1) 0 0 (polynomial x dense 1 0 0 2 1) 1)
-; (polynomial y dense (polynomial x dense 3 0 0 3 3) 0 0 (polynomial x dense 3 0 0 3 3) 3)
-; (polynomial y dense (polynomial x dense (scheme-number . 4) 0 0 (scheme-number . 5) (scheme-number . 4)) 0 0 (polynomial x dense (scheme-number . 4) 0 0 (scheme-number . 5) (scheme-number . 4)) (scheme-number . 4))
-
+;(polynomial x sparse (3 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))
+;"2.87"
+;(polynomial y sparse (3 (polynomial x sparse (3 1) (2 2) (1 1))) (2 (polynomial x sparse (3 1) (2 2) (1 1))) (1 1))
+;(polynomial y sparse (3 (polynomial x sparse (3 3) (2 3) (1 3))) (2 (polynomial x sparse (3 3) (2 3) (1 3))) (1 3))
+;(polynomial y sparse (3 (polynomial x sparse (3 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))) (2 (polynomial x sparse (3 (scheme-number . 4)) (2 (scheme-number . 5)) (1 (scheme-number . 4)))) (1 (scheme-number . 4)))
+;"2.88"
+;(polynomial x sparse (3 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))
+;(polynomial y sparse (3 (polynomial x sparse (3 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))) (2 (polynomial x sparse (3 (scheme-number . -2)) (2 (scheme-number . -1)) (1 (scheme-number . -2)))) (1 (scheme-number . -2)))
+;"2.89, 2.90"
+;(polynomial y dense (polynomial x dense 1 2 1) (polynomial x dense 1 2 1) 1)
+;(polynomial y dense (polynomial x dense 3 3 3) (polynomial x dense 3 3 3) 3)
+;(polynomial y dense (polynomial x dense (scheme-number . 4) (scheme-number . 5) (scheme-number . 4)) (polynomial x dense (scheme-number . 4) (scheme-number . 5) (scheme-number . 4)) (scheme-number . 4))
+;"2.91"
+;(polynomial x sparse ((3 (scheme-number . 1)) (1 (scheme-number . -1))) ((1 (scheme-number . 1)) (0 -1)))
 
 
