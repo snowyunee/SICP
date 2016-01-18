@@ -244,14 +244,27 @@
   ;(define (mul-poly p1 p2) ...)
   ;<procedures used by mul-poly>
   ; 책 다음 페이지에서 가져옴
-  (define (add-poly p1 p2)
-    (if (same-variable? (variable p1) (variable p2))
-        (make-poly (variable p1)
-                   (add-terms (term-list p1)
-                              (term-list p2)))
-        (error "Polys not in same var -- ADD-POLY"
-               (list p1 p2))))
+  ;(define (add-poly p1 p2)
+  ;  (if (same-variable? (variable p1) (variable p2))
+  ;      (make-poly (variable p1)
+  ;                 (add-terms (term-list p1)
+  ;                            (term-list p2)))
+  ;      (error "Polys not in same var -- ADD-POLY"
+  ;             (list p1 p2))))
   
+  ; e 2.92
+  (define (add-poly p1 p2)
+    (println (list p1 p2))
+    (println (list (variable p1) (variable p2)))
+    (cond ((same-variable? (variable p1) (variable p2))
+           (make-poly (variable p1)
+                      (add-terms (term-list p1)
+                                 (term-list p2))))
+          ((< (order (variable p1)) (order (variable p2)))
+           (add-poly (make-poly (variable p2) (cons 'sparse (list 0 p1))) p2))
+          (else 
+           (add-poly (make-poly (variable p1) (cons 'sparse (list 0 p2))) p1))))
+
   (define (mul-poly p1 p2)
     (if (same-variable? (variable p1) (variable p2))
         (make-poly (variable p1)
@@ -276,6 +289,13 @@
                               (term-list p2)))
         (error "Polys not in same var -- DIV-POLY"
                (list p1 p2))))
+
+  ; e 2.92
+  (define (order variable)
+    (cond ((same-variable? variable 'x) 0)
+          ((same-variable? variable 'y) 1)
+          ((same-variable? variable 'z) 2)
+          ))
     
 
   ; e 2.87
@@ -354,6 +374,16 @@
 (define k2 (make-polynomial 'x (cons 'sparse (list (list 2 1) (list 0 -1)))))
 (div k1 k2)
 
+(println "2.92")
+(define   x1 (make-polynomial 'x (cons 'sparse (list (list 1 1)))))
+(define   y1 (make-polynomial 'y (cons 'sparse (list (list 1 1)))))
+(define   z1 (make-polynomial 'z (cons 'sparse (list (list 1 1)))))
+(define  xy1 (make-polynomial 'y (cons 'sparse (list (list 1 x1)))))
+(define  xz1 (make-polynomial 'z (cons 'sparse (list (list 1 x1)))))
+(define xyz1 (make-polynomial 'z (cons 'sparse (list (list 1 xy1)))))
+(println x1)
+(println y1)
+(add x1 y1)
 
 
 ; output
@@ -370,6 +400,6 @@
 ;(polynomial y dense (polynomial x dense 3 3 3) (polynomial x dense 3 3 3) 3)
 ;(polynomial y dense (polynomial x dense (scheme-number . 4) (scheme-number . 5) (scheme-number . 4)) (polynomial x dense (scheme-number . 4) (scheme-number . 5) (scheme-number . 4)) (scheme-number . 4))
 ;"2.91"
-;(polynomial x sparse ((3 (scheme-number . 1)) (1 (scheme-number . -1))) ((1 (scheme-number . 1)) (0 -1)))
+;(polynomial x sparse ((3 (scheme-number . 1)) (1 (scheme-number . -1))) ((1 (scheme-number .  (0 -1)))
 
 
