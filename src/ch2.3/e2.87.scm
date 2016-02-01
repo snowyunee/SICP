@@ -261,9 +261,9 @@
                       (add-terms (term-list p1)
                                  (term-list p2))))
           ((< (order (variable p1)) (order (variable p2)))
-           (add-poly (make-poly (variable p2) (cons 'sparse (list 0 p1))) p2))
+           (add-poly (make-poly (variable p2) (cons 'sparse (list (list 0 p1)))) p2))
           (else 
-           (add-poly (make-poly (variable p1) (cons 'sparse (list 0 p2))) p1))))
+           (add-poly (make-poly (variable p1) (cons 'sparse (list (list 0 p2)))) p1))))
 
   (define (mul-poly p1 p2)
     (if (same-variable? (variable p1) (variable p2))
@@ -381,9 +381,10 @@
 (define  xy1 (make-polynomial 'y (cons 'sparse (list (list 1 x1)))))
 (define  xz1 (make-polynomial 'z (cons 'sparse (list (list 1 x1)))))
 (define xyz1 (make-polynomial 'z (cons 'sparse (list (list 1 xy1)))))
-(println x1)
-(println y1)
+(println (list "add " x1 y1))
 (add x1 y1)
+(add xy1 xz1)
+(add xyz1 xyz1)
 
 
 ; output
