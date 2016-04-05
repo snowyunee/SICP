@@ -113,7 +113,7 @@
   (define (call-the-cops b) "call-the-cops")
 
   (define (dispatch pw2 m)
-    (cond ((eq? failcnt 7) call-the-cops)
+    (cond ((and (eq? failcnt 6) (not (eq? pw pw2))) call-the-cops)
           ((not (eq? pw pw2))
             (begin (set! failcnt (+ failcnt 1))
                    (acc pw2 m)))
