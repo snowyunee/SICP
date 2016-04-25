@@ -1,5 +1,11 @@
 #lang scheme
 
+(provide make-withdraw)
+(provide make-account)
+(provide make-account2)
+(provide make-account3)
+(provide make-monitored)
+
 (define (make-withdraw balance)
   (lambda (amount)
     (if (>= balance amount)
